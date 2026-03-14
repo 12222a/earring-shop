@@ -3,6 +3,8 @@ import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 
+export const dynamic = "force-dynamic"
+
 async function getProducts(searchParams: { [key: string]: string | string[] | undefined }) {
   const category = searchParams.category as string
   const search = searchParams.search as string
@@ -25,6 +27,8 @@ async function getProducts(searchParams: { [key: string]: string | string[] | un
     orderBy: { createdAt: "desc" },
   })
 }
+
+type Product = Awaited<ReturnType<typeof getProducts>>[number]
 
 export default async function ProductsPage({
   searchParams,
@@ -71,7 +75,7 @@ export default async function ProductsPage({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
+          {products.map((product: Product) => (
             <Link key={product.id} href={`/products/${product.id}`} className="group">
               <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition-shadow">
                 <div className="relative h-64">

@@ -1,5 +1,16 @@
 import Stripe from "stripe"
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
-})
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+
+export const stripe = stripeSecretKey
+  ? new Stripe(stripeSecretKey, {
+      apiVersion: "2025-02-24.acacia",
+    })
+  : null
+
+export function getStripe(): Stripe {
+  if (!stripe) {
+    throw new Error("STRIPE_SECRET_KEY is not configured")
+  }
+  return stripe
+}

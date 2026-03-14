@@ -91,15 +91,15 @@ export async function GET(request: NextRequest) {
     ])
 
     // 获取热销商品详情
-    const topProductIds = topProducts.map((p) => p.productId)
+    const topProductIds = topProducts.map((p: { productId: string }) => p.productId)
     const topProductDetails = await prisma.product.findMany({
       where: { id: { in: topProductIds } },
       select: { id: true, name: true, imageUrl: true },
     })
 
-    const topProductsWithDetails = topProducts.map((tp) => ({
+    const topProductsWithDetails = topProducts.map((tp: { productId: string; _sum: { quantity: number | null } }) => ({
       ...tp,
-      product: topProductDetails.find((p) => p.id === tp.productId),
+      product: topProductDetails.find((p: { id: string }) => p.id === tp.productId),
     }))
 
     return NextResponse.json({

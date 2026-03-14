@@ -6,11 +6,12 @@ import { authOptions } from "@/lib/auth"
 // GET /api/products/[id] - 获取单个商品
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const product = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!product) {
@@ -32,9 +33,10 @@ export async function GET(
 // PUT /api/products/[id] - 更新商品（仅管理员）
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session || (session.user as any).role !== "ADMIN") {
@@ -48,7 +50,7 @@ export async function PUT(
     const { name, description, price, imageUrl, category, stock, featured } = body
 
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         description,
@@ -72,9 +74,10 @@ export async function PUT(
 // DELETE /api/products/[id] - 删除商品（仅管理员）
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session || (session.user as any).role !== "ADMIN") {
@@ -85,7 +88,7 @@ export async function DELETE(
     }
 
     await prisma.product.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

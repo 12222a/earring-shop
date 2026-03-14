@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, ShoppingBag, Users, DollarSign } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 async function getStats() {
   const [
     totalProducts,
@@ -36,6 +38,8 @@ async function getRecentOrders() {
     }
   })
 }
+
+type RecentOrder = Awaited<ReturnType<typeof getRecentOrders>>[number]
 
 export default async function AdminDashboard() {
   const stats = await getStats()
@@ -91,7 +95,7 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((order) => (
+                {recentOrders.map((order: RecentOrder) => (
                   <tr key={order.id} className="border-b hover:bg-stone-50">
                     <td className="py-3 px-4 font-mono text-sm">{order.id.slice(0, 8)}</td>
                     <td className="py-3 px-4">{order.user.name || order.user.email}</td>

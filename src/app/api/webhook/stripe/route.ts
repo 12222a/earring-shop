@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { stripe } from "@/lib/stripe"
+import { getStripe } from "@/lib/stripe"
 
-// POST /api/webhook/stripe - Stripe 支付回调
+// POST /api/webhook/stripe
 export async function POST(request: NextRequest) {
+  const stripe = getStripe()
   const payload = await request.text()
   const signature = request.headers.get("stripe-signature")
 
@@ -23,21 +24,19 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     )
   } catch (err: any) {
-    console.error(`Webhook signature verification failed:`, err.message)
+    console.error("Webhook signature verification failed:", err.message)
     return NextResponse.json(
       { error: `Webhook Error: ${err.message}` },
       { status: 400 }
     )
   }
 
-  // 处理支付成功事件
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as any
     const orderId = session.metadata?.orderId
 
     if (orderId) {
       try {
-        // 更新订单状态为已支付
         await prisma.order.update({
           where: { id: orderId },
           data: {
@@ -46,11 +45,7 @@ export async function POST(request: NextRequest) {
           },
         })
 
-        console.log(`✅ Order ${orderId} marked as PAID`)
-
-        // TODO: 发送邮件通知
-        // await sendPaymentSuccessEmail(orderId)
-
+        console.log(`Order ${orderId} marked as PAID`)
       } catch (error) {
         console.error(`Failed to update order ${orderId}:`, error)
         return NextResponse.json(
@@ -61,7 +56,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 处理支付失败事件
   if (event.type === "checkout.session.expired") {
     const session = event.data.object as any
     const orderId = session.metadata?.orderId
@@ -71,16 +65,9 @@ export async function POST(request: NextRequest) {
         where: { id: orderId },
         data: { status: "CANCELLED" },
       })
-      console.log(`❌ Order ${orderId} cancelled due to expired session`)
+      console.log(`Order ${orderId} cancelled due to expired session`)
     }
   }
 
   return NextResponse.json({ received: true })
-}
-
-// 禁用 body parser，Stripe 需要原始 body
-export const config = {
-  api: {
-    bodyParser: false,
-  },
 }
