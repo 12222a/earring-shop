@@ -1,0 +1,35 @@
+ComfyUI + FLUX.1-schnell FP8 使用说明
+
+1. 安装位置
+ComfyUI:
+D:\AI\ComfyUI
+
+主模型:
+D:\AI\ComfyUI\models\checkpoints\flux1-schnell-fp8.safetensors
+
+2. 启动
+双击“启动 ComfyUI（FLUX）.bat”
+启动后浏览器会自动打开：
+http://127.0.0.1:8188
+
+黑色窗口不要关闭，关闭就等于把本地服务停掉。
+
+3. 停止
+双击“停止 ComfyUI.bat”
+
+4. 这套方案是什么
+这是 ComfyUI 本地生图环境，主模型是 FLUX.1-schnell 的 FP8 版。
+我已经按你的显卡做了偏稳的启动参数：
+--lowvram
+
+5. 第一次进界面后怎么用
+在 ComfyUI 里选一个文字生图模板或基础工作流，然后把模型选成：
+flux1-schnell-fp8.safetensors
+
+6. 提醒
+这次只装了主力方案：
+- ComfyUI
+- FLUX.1-schnell FP8
+
+像 Redux、Depth、Fill 这些扩展我还没有继续往里装。
+如果你要，我可以下一步继续帮你加。

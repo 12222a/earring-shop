@@ -1,0 +1,42 @@
+Qwen3-TTS-12Hz-0.6B-Base 本地使用说明
+
+1. 一键测试
+双击桌面的“Qwen3-TTS-测试生成.bat”。
+它会使用已经准备好的参考音频，生成一段测试语音到桌面：
+qwen3_tts_test_output.wav
+
+2. 打开网页界面
+双击桌面的“Qwen3-TTS-启动网页界面.bat”。
+启动后在浏览器打开：
+http://127.0.0.1:8000
+这个黑色窗口不要关，关掉就等于把本地服务停掉。
+
+3. 停止网页界面
+双击桌面的“Qwen3-TTS-停止网页界面.bat”。
+
+4. Base 模型怎么用
+这个模型是“声音克隆”路线，不是纯文字直接选音色。
+你需要提供：
+- 参考音频
+- 参考音频对应的文字
+- 目标文本
+
+在网页界面的 Voice Clone 页签里：
+- 上传参考音频
+- 填参考文本
+- 填要合成的新文本
+- 点击 Generate
+
+5. 当前安装位置
+环境目录：
+D:\AI\qwen3-tts-0.6b-base
+
+模型缓存：
+D:\AI\qwen3-tts-0.6b-base\hf-cache
+
+参考音频：
+D:\AI\qwen3-tts-0.6b-base\reference_en.wav
+
+6. 当前机器的稳定参数
+这台机器上，Qwen3-TTS-12Hz-0.6B-Base 使用 bfloat16 可以正常生成。
+float16 会触发 CUDA 运行错误，所以启动脚本里已经固定成 bfloat16。
