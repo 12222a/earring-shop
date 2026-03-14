@@ -1,16 +1,70 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { prisma } from "@/lib/prisma"
 import Image from "next/image"
 
 export const dynamic = "force-dynamic"
 
+// 模拟产品数据（无数据库时使用）
+const mockProducts = [
+  {
+    id: "1",
+    name: "珍珠耳环",
+    description: "优雅淡水珍珠",
+    price: 299,
+    imageUrl: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400",
+    category: "stud",
+    featured: true,
+    stock: 10,
+    createdAt: new Date(),
+  },
+  {
+    id: "2",
+    name: "金色耳圈",
+    description: "18K镀金",
+    price: 199,
+    imageUrl: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=400",
+    category: "hoop",
+    featured: true,
+    stock: 15,
+    createdAt: new Date(),
+  },
+  {
+    id: "3",
+    name: "水晶耳坠",
+    description: "施华洛世奇水晶",
+    price: 399,
+    imageUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400",
+    category: "dangle",
+    featured: true,
+    stock: 8,
+    createdAt: new Date(),
+  },
+  {
+    id: "4",
+    name: "钻石耳钉",
+    description: "闪亮锆石",
+    price: 159,
+    imageUrl: "https://images.unsplash.com/photo-1635767798638-3e2523c0188c?w=400",
+    category: "stud",
+    featured: true,
+    stock: 20,
+    createdAt: new Date(),
+  },
+]
+
 async function getFeaturedProducts() {
-  return await prisma.product.findMany({
-    where: { featured: true },
-    take: 4,
-    orderBy: { createdAt: "desc" },
-  })
+  try {
+    // 尝试从数据库获取
+    const { prisma } = await import("@/lib/prisma")
+    return await prisma.product.findMany({
+      where: { featured: true },
+      take: 4,
+      orderBy: { createdAt: "desc" },
+    })
+  } catch {
+    // 数据库不可用时使用模拟数据
+    return mockProducts
+  }
 }
 
 type FeaturedProduct = Awaited<ReturnType<typeof getFeaturedProducts>>[number]
