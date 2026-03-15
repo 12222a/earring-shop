@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { findMockProductById } from "@/lib/mock-products"
 
 // GET /api/products/[id] - 获取单个商品
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
+
   try {
-    const { id } = await params
     const product = await prisma.product.findUnique({
       where: { id }
     })
@@ -23,10 +25,16 @@ export async function GET(
 
     return NextResponse.json(product)
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch product" },
-      { status: 500 }
-    )
+    const fallbackProduct = findMockProductById(id)
+
+    if (!fallbackProduct) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(fallbackProduct)
   }
 }
 
