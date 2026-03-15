@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getStripe } from "@/lib/stripe"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { getProductImageSrc, toAbsoluteImageUrl } from "@/lib/product-images"
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,17 +19,21 @@ export async function POST(request: NextRequest) {
     const { items, orderId } = body
     const stripe = getStripe()
 
-    const lineItems = items.map((item: any) => ({
+    const lineItems = items.map((item: any) => {
+      const resolvedImage = getProductImageSrc(item.imageUrl, item.category, "card")
+      const absoluteImage = toAbsoluteImageUrl(resolvedImage, process.env.NEXTAUTH_URL)
+
+      return ({
       price_data: {
         currency: "usd",
         product_data: {
           name: item.name,
-          images: item.imageUrl ? [item.imageUrl] : [],
+          images: absoluteImage.startsWith("http") ? [absoluteImage] : [],
         },
         unit_amount: Math.round(item.price * 100),
       },
       quantity: item.quantity,
-    }))
+    })})
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

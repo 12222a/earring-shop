@@ -1,9 +1,9 @@
-import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { StoreImage } from "@/components/store-image"
 import { isDatabaseConfigured } from "@/lib/database"
 import { mockProducts } from "@/lib/mock-products"
-import { getProductImageSrc } from "@/lib/product-images"
+import { getCategoryImage, getProductImageSrc } from "@/lib/product-images"
 
 export const dynamic = "force-dynamic"
 
@@ -11,8 +11,8 @@ async function getProducts(searchParams: { [key: string]: string | string[] | un
   const category = searchParams.category as string
   const search = searchParams.search as string
 
-  if (!isDatabaseConfigured) {
-    let filtered = mockProducts
+  const filterProducts = (products: typeof mockProducts) => {
+    let filtered = products
 
     if (category && category !== "all") {
       filtered = filtered.filter((product) => product.category === category)
@@ -26,6 +26,10 @@ async function getProducts(searchParams: { [key: string]: string | string[] | un
     }
 
     return filtered
+  }
+
+  if (!isDatabaseConfigured) {
+    return filterProducts(mockProducts)
   }
 
   try {
@@ -49,21 +53,7 @@ async function getProducts(searchParams: { [key: string]: string | string[] | un
     })
   } catch (error) {
     console.error("Failed to load products:", error)
-
-    let filtered = mockProducts
-
-    if (category && category !== "all") {
-      filtered = filtered.filter((product) => product.category === category)
-    }
-
-    if (search) {
-      filtered = filtered.filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase()) ||
-        product.description.toLowerCase().includes(search.toLowerCase())
-      )
-    }
-
-    return filtered
+    return filterProducts(mockProducts)
   }
 }
 
@@ -110,42 +100,51 @@ export default async function ProductsPage({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map((product: Product) => (
-            <Link key={product.id} href={`/products/${product.id}`} className="group">
-              <div className="overflow-hidden rounded-xl bg-white shadow transition-shadow hover:shadow-lg">
-                <div className="relative h-64 bg-stone-100">
-                  <Image
-                    src={getProductImageSrc(
-                      "imageUrl" in product ? product.imageUrl : undefined,
-                      "category" in product ? product.category : undefined
-                    )}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                  {"stock" in product && product.stock <= 0 && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                      <span className="font-medium text-white">已售罄</span>
-                    </div>
-                  )}
-                </div>
+          {products.map((product: Product) => {
+            const resolvedCategory = "category" in product ? product.category : undefined
+            const imageSrc = getProductImageSrc(
+              "imageUrl" in product ? product.imageUrl : undefined,
+              resolvedCategory,
+              "card"
+            )
+            const fallbackSrc = getCategoryImage(resolvedCategory, "card")
 
-                <div className="p-4">
-                  <h3 className="mb-1 font-medium text-stone-900">{product.name}</h3>
-                  {"description" in product && (
-                    <p className="mb-2 line-clamp-2 text-sm text-stone-500">{product.description}</p>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <p className="font-bold text-[#D4A574]">¥{Number(product.price).toFixed(2)}</p>
-                    {"stock" in product && product.stock > 0 && product.stock < 10 && (
-                      <span className="text-xs text-red-500">仅剩 {product.stock} 件</span>
+            return (
+              <Link key={product.id} href={`/products/${product.id}`} className="group">
+                <div className="overflow-hidden rounded-xl bg-white shadow transition-shadow hover:shadow-lg">
+                  <div className="relative h-64 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.96),_rgba(245,240,233,0.94)_55%,_rgba(232,223,212,0.92))]">
+                    <StoreImage
+                      src={imageSrc}
+                      fallbackSrc={fallbackSrc}
+                      alt={product.name}
+                      fill
+                      sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                    {"stock" in product && product.stock <= 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <span className="font-medium text-white">已售罄</span>
+                      </div>
                     )}
                   </div>
+
+                  <div className="p-4">
+                    <h3 className="mb-1 font-medium text-stone-900">{product.name}</h3>
+                    {"description" in product && (
+                      <p className="mb-2 line-clamp-2 text-sm text-stone-500">{product.description}</p>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-[#D4A574]">¥{Number(product.price).toFixed(2)}</p>
+                      {"stock" in product && product.stock > 0 && product.stock < 10 && (
+                        <span className="text-xs text-red-500">仅剩 {product.stock} 件</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { getProductImageSrc } from "@/lib/product-images"
+import { StoreImage } from "@/components/store-image"
+import { getCategoryImage, getProductImageSrc } from "@/lib/product-images"
 
 interface Order {
   id: string
@@ -121,13 +121,15 @@ export default function AdminOrdersPage() {
                         {order.orderItems.slice(0, 3).map((item) => (
                           <div
                             key={item.id}
-                            className="relative w-8 h-8 rounded-full border-2 border-white overflow-hidden"
+                            className="relative w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-white"
                           >
-                            <Image
-                              src={getProductImageSrc(item.product.imageUrl)}
+                            <StoreImage
+                              src={getProductImageSrc(item.product.imageUrl, undefined, "mini")}
+                              fallbackSrc={getCategoryImage(undefined, "mini")}
                               alt={item.product.name}
                               fill
-                              className="object-cover"
+                              sizes="32px"
+                              className="object-contain p-0.5"
                             />
                           </div>
                         ))}

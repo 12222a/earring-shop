@@ -1,6 +1,6 @@
-import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { StoreImage } from "@/components/store-image"
 import { isDatabaseConfigured } from "@/lib/database"
 import { mockProducts } from "@/lib/mock-products"
 import { getCategoryImage, getProductImageSrc, heroImageSrc } from "@/lib/product-images"
@@ -32,17 +32,17 @@ const categories = [
   {
     id: "stud",
     title: "耳钉",
-    description: "简约精致，日常百搭",
+    description: "简约精致，适合日常佩戴",
   },
   {
     id: "dangle",
     title: "耳环",
-    description: "优雅灵动，彰显气质",
+    description: "灵动垂坠，更显气质层次",
   },
   {
     id: "hoop",
     title: "耳圈",
-    description: "时尚前卫，个性十足",
+    description: "线条利落，轻松搭出态度",
   },
 ]
 
@@ -77,12 +77,14 @@ export default async function Home() {
             </div>
 
             <div className="relative h-96 overflow-hidden rounded-2xl bg-white shadow-2xl">
-              <Image
+              <StoreImage
                 src={heroImageSrc}
+                fallbackSrc={getCategoryImage("dangle", "hero")}
                 alt="精美耳饰展示"
                 fill
                 priority
-                className="object-cover"
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover object-[center_34%]"
               />
             </div>
           </div>
@@ -98,7 +100,7 @@ export default async function Home() {
                 key={category.id}
                 title={category.title}
                 description={category.description}
-                image={getCategoryImage(category.id)}
+                image={getCategoryImage(category.id, "category")}
                 href={`/products?category=${category.id}`}
               />
             ))}
@@ -127,7 +129,7 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 gap-8 text-center md:grid-cols-4">
             <FeatureItem icon="🚚" title="免费配送" description="订单满 299 元免运费" />
-            <FeatureItem icon="✨" title="品质保证" description="精选材质，细节可见" />
+            <FeatureItem icon="✨" title="品质保证" description="精选材质，细节清晰可见" />
             <FeatureItem icon="🔄" title="7 天退换" description="支持无忧退换服务" />
             <FeatureItem icon="💎" title="精美包装" description="自用送礼都很合适" />
           </div>
@@ -151,11 +153,13 @@ function CategoryCard({
   return (
     <Link href={href} className="group">
       <div className="relative h-64 overflow-hidden rounded-xl bg-stone-100">
-        <Image
+        <StoreImage
           src={image}
+          fallbackSrc={getCategoryImage("stud", "category")}
           alt={title}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(min-width: 1024px) 33vw, 100vw"
+          className="object-cover object-[center_38%] transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-0 left-0 p-6 text-white">
@@ -168,16 +172,26 @@ function CategoryCard({
 }
 
 function ProductCard({ product }: { product: FeaturedProduct }) {
+  const category = "category" in product ? product.category : undefined
   const imageSrc = getProductImageSrc(
     "imageUrl" in product ? product.imageUrl : undefined,
-    "category" in product ? product.category : undefined
+    category,
+    "card"
   )
+  const fallbackSrc = getCategoryImage(category, "card")
 
   return (
     <Link href={`/products/${product.id}`} className="group">
       <div className="overflow-hidden rounded-xl bg-white shadow transition-shadow hover:shadow-lg">
-        <div className="relative h-64 bg-stone-100">
-          <Image src={imageSrc} alt={product.name} fill className="object-cover" />
+        <div className="relative h-64 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.96),_rgba(245,240,233,0.94)_55%,_rgba(232,223,212,0.92))]">
+          <StoreImage
+            src={imageSrc}
+            fallbackSrc={fallbackSrc}
+            alt={product.name}
+            fill
+            sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
+            className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.03]"
+          />
         </div>
         <div className="p-4">
           <h3 className="mb-2 font-medium text-stone-900">{product.name}</h3>

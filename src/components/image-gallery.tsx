@@ -1,23 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { StoreImage } from "@/components/store-image"
 import { cn } from "@/lib/utils"
-import { getProductImageSrc } from "@/lib/product-images"
+import { getCategoryImage, getProductImageSrc } from "@/lib/product-images"
 
 interface ImageGalleryProps {
   images: string[]
   productName: string
+  category?: string
 }
 
-export function ImageGallery({ images, productName }: ImageGalleryProps) {
+export function ImageGallery({ images, productName, category }: ImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
 
   const resolvedImages =
     images && images.length > 0
-      ? images.map((image) => getProductImageSrc(image))
-      : [getProductImageSrc()]
+      ? images.map((image) => getProductImageSrc(image, category, "detail"))
+      : [getProductImageSrc(undefined, category, "detail")]
+
+  const fallbackSrc = getCategoryImage(category, "detail")
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % resolvedImages.length)
@@ -29,13 +32,15 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-stone-100">
-        <Image
+      <div className="relative aspect-square overflow-hidden rounded-xl border border-stone-200 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(246,241,234,0.95)_55%,_rgba(232,223,212,0.92))]">
+        <StoreImage
           src={resolvedImages[currentIndex]}
+          fallbackSrc={fallbackSrc}
           alt={`${productName} 图片 ${currentIndex + 1}`}
           fill
           priority
-          className="object-cover"
+          sizes="(min-width: 768px) 50vw, 100vw"
+          className="object-contain p-6"
         />
 
         {resolvedImages.length > 1 && (
@@ -69,17 +74,19 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               key={`${image}-${index}`}
               onClick={() => setCurrentIndex(index)}
               className={cn(
-                "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors",
+                "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(246,241,234,0.95)_55%,_rgba(232,223,212,0.92))] transition-colors",
                 index === currentIndex
                   ? "border-[#D4A574]"
                   : "border-transparent hover:border-stone-300"
               )}
             >
-              <Image
-                src={image}
+              <StoreImage
+                src={getProductImageSrc(image, category, "thumb")}
+                fallbackSrc={getCategoryImage(category, "thumb")}
                 alt={`${productName} 缩略图 ${index + 1}`}
                 fill
-                className="object-cover"
+                sizes="64px"
+                className="object-contain p-1.5"
               />
             </button>
           ))}

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Edit, Trash2 } from "lucide-react"
-import { getProductImageSrc } from "@/lib/product-images"
+import { StoreImage } from "@/components/store-image"
+import { getCategoryImage, getProductImageSrc } from "@/lib/product-images"
 
 interface Product {
   id: string
@@ -98,12 +98,14 @@ export default function AdminProductsPage() {
                 {products.map((product) => (
                   <tr key={product.id} className="border-b hover:bg-stone-50">
                     <td className="py-3 px-4">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden">
-                        <Image
-                          src={getProductImageSrc(product.imageUrl, product.category)}
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(246,241,234,0.95)_55%,_rgba(232,223,212,0.92))]">
+                        <StoreImage
+                          src={getProductImageSrc(product.imageUrl, product.category, "mini")}
+                          fallbackSrc={getCategoryImage(product.category, "mini")}
                           alt={product.name}
                           fill
-                          className="object-cover"
+                          sizes="48px"
+                          className="object-contain p-1"
                         />
                       </div>
                     </td>

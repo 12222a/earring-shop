@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import { useParams } from "next/navigation"
+import { ArrowLeft, Minus, Plus, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Minus, Plus, ShoppingCart, ArrowLeft } from "lucide-react"
-import { getProductImageSrc } from "@/lib/product-images"
+import { StoreImage } from "@/components/store-image"
+import { getCategoryImage, getProductImageSrc } from "@/lib/product-images"
 
 interface Product {
   id: string
@@ -59,7 +59,7 @@ export default function ProductDetailPage() {
       })
 
       if (res.ok) {
-        alert("已添加到购物车！")
+        alert("已加入购物车")
       } else {
         alert("请先登录")
         window.location.href = "/login"
@@ -75,7 +75,7 @@ export default function ProductDetailPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
-          <div className="h-96 bg-stone-200 rounded-xl"></div>
+          <div className="h-96 rounded-xl bg-stone-200"></div>
         </div>
       </div>
     )
@@ -94,46 +94,47 @@ export default function ProductDetailPage() {
     )
   }
 
+  const imageSrc = getProductImageSrc(product.imageUrl, product.category, "detail")
+  const fallbackSrc = getCategoryImage(product.category, "detail")
+
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb */}
-      <Link href="/products" className="flex items-center text-stone-500 hover:text-[#D4A574] mb-6">
-        <ArrowLeft className="h-4 w-4 mr-1" />
+      <Link href="/products" className="mb-6 flex items-center text-stone-500 hover:text-[#D4A574]">
+        <ArrowLeft className="mr-1 h-4 w-4" />
         返回商品列表
       </Link>
 
-      <div className="grid md:grid-cols-2 gap-12">
-        {/* Image */}
-        <div className="relative h-96 md:h-[500px] rounded-2xl overflow-hidden">
-          <Image
-            src={getProductImageSrc(product.imageUrl, product.category)}
+      <div className="grid gap-12 md:grid-cols-2">
+        <div className="relative h-96 overflow-hidden rounded-2xl border border-stone-200 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(246,241,234,0.95)_55%,_rgba(232,223,212,0.92))] md:h-[540px]">
+          <StoreImage
+            src={imageSrc}
+            fallbackSrc={fallbackSrc}
             alt={product.name}
             fill
-            className="object-cover"
+            priority
+            sizes="(min-width: 768px) 50vw, 100vw"
+            className="object-contain p-6 md:p-10"
           />
         </div>
 
-        {/* Info */}
         <div className="space-y-6">
           <div>
-            <span className="text-sm text-stone-500 uppercase tracking-wide">{product.category}</span>
-            <h1 className="text-3xl font-bold mt-2">{product.name}</h1>
+            <span className="text-sm uppercase tracking-wide text-stone-500">{product.category}</span>
+            <h1 className="mt-2 text-3xl font-bold">{product.name}</h1>
           </div>
 
           <p className="text-3xl font-bold text-[#D4A574]">¥{Number(product.price).toFixed(2)}</p>
-
-          <p className="text-stone-600 leading-relaxed">{product.description}</p>
+          <p className="leading-relaxed text-stone-600">{product.description}</p>
 
           {product.stock <= 0 ? (
-            <Card className="p-4 bg-red-50 border-red-200">
-              <p className="text-red-600 text-center">该商品已售罄</p>
+            <Card className="border-red-200 bg-red-50 p-4">
+              <p className="text-center text-red-600">该商品已售罄</p>
             </Card>
           ) : (
             <>
-              {/* Quantity Selector */}
               <div className="flex items-center space-x-4">
                 <span className="text-stone-600">数量：</span>
-                <div className="flex items-center border rounded-lg">
+                <div className="flex items-center rounded-lg border">
                   <button
                     className="p-2 hover:bg-stone-100"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -150,10 +151,9 @@ export default function ProductDetailPage() {
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                <span className="text-sm text-stone-500">库存: {product.stock}件</span>
+                <span className="text-sm text-stone-500">库存：{product.stock} 件</span>
               </div>
 
-              {/* Add to Cart Button */}
               <Button
                 size="lg"
                 className="w-full"
@@ -161,24 +161,23 @@ export default function ProductDetailPage() {
                 onClick={addToCart}
                 disabled={addingToCart}
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                {addingToCart ? "添加中..." : "加入购物车"}
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                {addingToCart ? "加入中..." : "加入购物车"}
               </Button>
             </>
           )}
 
-          {/* Features */}
-          <div className="border-t pt-6 space-y-2">
+          <div className="space-y-2 border-t pt-6">
             <div className="flex items-center text-sm text-stone-600">
-              <span className="w-4 h-4 rounded-full bg-green-500 mr-2"></span>
+              <span className="mr-2 h-4 w-4 rounded-full bg-green-500"></span>
               100% 正品保证
             </div>
             <div className="flex items-center text-sm text-stone-600">
-              <span className="w-4 h-4 rounded-full bg-green-500 mr-2"></span>
-              7天无理由退换
+              <span className="mr-2 h-4 w-4 rounded-full bg-green-500"></span>
+              7 天无理由退换
             </div>
             <div className="flex items-center text-sm text-stone-600">
-              <span className="w-4 h-4 rounded-full bg-green-500 mr-2"></span>
+              <span className="mr-2 h-4 w-4 rounded-full bg-green-500"></span>
               精美礼盒包装
             </div>
           </div>

@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { getProductImageSrc } from "@/lib/product-images"
+import { StoreImage } from "@/components/store-image"
+import { getCategoryImage, getProductImageSrc } from "@/lib/product-images"
 
 interface OrderItem {
   id: string
@@ -109,12 +109,14 @@ export default function OrdersPage() {
               <div className="space-y-3">
                 {order.orderItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-stone-100">
-                      <Image
-                        src={getProductImageSrc(item.product.imageUrl)}
+                    <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(246,241,234,0.95)_55%,_rgba(232,223,212,0.92))]">
+                      <StoreImage
+                        src={getProductImageSrc(item.product.imageUrl, undefined, "mini")}
+                        fallbackSrc={getCategoryImage(undefined, "mini")}
                         alt={item.product.name}
                         fill
-                        className="object-cover"
+                        sizes="64px"
+                        className="object-contain p-1.5"
                       />
                     </div>
                     <div className="flex-1">

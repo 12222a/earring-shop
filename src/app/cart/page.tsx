@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { StoreImage } from "@/components/store-image"
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
-import { getProductImageSrc } from "@/lib/product-images"
+import { getCategoryImage, getProductImageSrc } from "@/lib/product-images"
 
 interface CartItem {
   id: string
@@ -140,12 +140,14 @@ export default function CartPage() {
           {cartItems.map((item) => (
             <Card key={item.id} className="p-4">
               <div className="flex gap-4">
-                <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                  <Image
-                    src={getProductImageSrc(item.product.imageUrl)}
+                <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(246,241,234,0.95)_55%,_rgba(232,223,212,0.92))]">
+                  <StoreImage
+                    src={getProductImageSrc(item.product.imageUrl, undefined, "mini")}
+                    fallbackSrc={getCategoryImage(undefined, "mini")}
                     alt={item.product.name}
                     fill
-                    className="object-cover"
+                    sizes="96px"
+                    className="object-contain p-2"
                   />
                 </div>
 
