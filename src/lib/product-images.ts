@@ -43,9 +43,16 @@ function applyUnsplashPreset(src: string, variant: ProductImageVariant) {
   const preset = IMAGE_PRESETS[variant]
   url.searchParams.set("w", String(preset.width))
   url.searchParams.set("q", String(preset.quality))
+  url.searchParams.set("auto", "format")
+
+  if (variant === "hero") {
+    url.searchParams.set("fit", "max")
+    url.searchParams.delete("crop")
+    return url.toString()
+  }
+
   url.searchParams.set("fit", "crop")
   url.searchParams.set("crop", "faces,center")
-  url.searchParams.set("auto", "format")
   return url.toString()
 }
 

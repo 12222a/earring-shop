@@ -76,15 +76,15 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="relative h-96 overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="relative ml-auto h-[28rem] w-full max-w-[26rem] overflow-hidden rounded-[28px] border border-white/70 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(244,239,232,0.95)_58%,_rgba(229,221,210,0.92))] shadow-2xl md:h-[34rem] md:max-w-[28rem]">
               <StoreImage
                 src={heroImageSrc}
-                fallbackSrc={getCategoryImage("dangle", "hero")}
+                fallbackSrc={getCategoryImage("dangle", "detail")}
                 alt="精美耳饰展示"
                 fill
                 priority
-                sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover object-[center_34%]"
+                sizes="(min-width: 1024px) 28rem, (min-width: 768px) 40vw, 100vw"
+                className="object-contain p-5 md:p-7"
               />
             </div>
           </div>
