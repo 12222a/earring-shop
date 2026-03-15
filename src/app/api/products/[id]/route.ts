@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { isDatabaseConfigured } from "@/lib/database"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -10,6 +11,19 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+
+  if (!isDatabaseConfigured) {
+    const fallbackProduct = findMockProductById(id)
+
+    if (!fallbackProduct) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(fallbackProduct)
+  }
 
   try {
     const product = await prisma.product.findUnique({

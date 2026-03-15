@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { getProductImageSrc } from "@/lib/product-images"
 
 interface Order {
   id: string
@@ -123,7 +124,7 @@ export default function AdminOrdersPage() {
                             className="relative w-8 h-8 rounded-full border-2 border-white overflow-hidden"
                           >
                             <Image
-                              src={item.product.imageUrl || "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=50"}
+                              src={getProductImageSrc(item.product.imageUrl)}
                               alt={item.product.name}
                               fill
                               className="object-cover"

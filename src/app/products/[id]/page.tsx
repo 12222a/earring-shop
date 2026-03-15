@@ -7,6 +7,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Minus, Plus, ShoppingCart, ArrowLeft } from "lucide-react"
+import { getProductImageSrc } from "@/lib/product-images"
 
 interface Product {
   id: string
@@ -105,7 +106,7 @@ export default function ProductDetailPage() {
         {/* Image */}
         <div className="relative h-96 md:h-[500px] rounded-2xl overflow-hidden">
           <Image
-            src={product.imageUrl || "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800"}
+            src={getProductImageSrc(product.imageUrl, product.category)}
             alt={product.name}
             fill
             className="object-cover"

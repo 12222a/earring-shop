@@ -1,91 +1,66 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
+import { isDatabaseConfigured } from "@/lib/database"
+import { mockProducts } from "@/lib/mock-products"
+import { getCategoryImage, getProductImageSrc, heroImageSrc } from "@/lib/product-images"
 
 export const dynamic = "force-dynamic"
 
-// 模拟产品数据（无数据库时使用）
-const mockProducts = [
-  {
-    id: "1",
-    name: "珍珠耳环",
-    description: "优雅淡水珍珠",
-    price: 299,
-    imageUrl: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400",
-    category: "stud",
-    featured: true,
-    stock: 10,
-    createdAt: new Date(),
-  },
-  {
-    id: "2",
-    name: "金色耳圈",
-    description: "18K镀金",
-    price: 199,
-    imageUrl: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=400",
-    category: "hoop",
-    featured: true,
-    stock: 15,
-    createdAt: new Date(),
-  },
-  {
-    id: "3",
-    name: "水晶耳坠",
-    description: "施华洛世奇水晶",
-    price: 399,
-    imageUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400",
-    category: "dangle",
-    featured: true,
-    stock: 8,
-    createdAt: new Date(),
-  },
-  {
-    id: "4",
-    name: "钻石耳钉",
-    description: "闪亮锆石",
-    price: 159,
-    imageUrl: "https://images.unsplash.com/photo-1635767798638-3e2523c0188c?w=400",
-    category: "stud",
-    featured: true,
-    stock: 20,
-    createdAt: new Date(),
-  },
-]
-
 async function getFeaturedProducts() {
+  if (!isDatabaseConfigured) {
+    return mockProducts.filter((product) => product.featured).slice(0, 4)
+  }
+
   try {
-    // 尝试从数据库获取
     const { prisma } = await import("@/lib/prisma")
+
     return await prisma.product.findMany({
       where: { featured: true },
       take: 4,
       orderBy: { createdAt: "desc" },
     })
-  } catch {
-    // 数据库不可用时使用模拟数据
-    return mockProducts
+  } catch (error) {
+    console.error("Failed to load featured products:", error)
+    return mockProducts.filter((product) => product.featured).slice(0, 4)
   }
 }
 
 type FeaturedProduct = Awaited<ReturnType<typeof getFeaturedProducts>>[number]
+
+const categories = [
+  {
+    id: "stud",
+    title: "耳钉",
+    description: "简约精致，日常百搭",
+  },
+  {
+    id: "dangle",
+    title: "耳环",
+    description: "优雅灵动，彰显气质",
+  },
+  {
+    id: "hoop",
+    title: "耳圈",
+    description: "时尚前卫，个性十足",
+  },
+]
 
 export default async function Home() {
   const featuredProducts = await getFeaturedProducts()
 
   return (
     <div>
-      {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-stone-100 to-stone-200 py-20 md:py-32">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid items-center gap-12 md:grid-cols-2">
             <div className="space-y-6">
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+              <h1 className="text-4xl font-bold leading-tight md:text-6xl">
                 发现你的
                 <span style={{ color: "#D4A574" }}> 独特魅力</span>
               </h1>
-              <p className="text-lg text-stone-600 max-w-lg">
-                精选全球顶级设计师耳饰作品，每一件都是彰显个性的艺术品。
-                从简约日常款到华丽宴会款，为你的每一刻增添光彩。
+              <p className="max-w-lg text-lg text-stone-600">
+                精选设计感耳饰作品，从简约日常款到宴会亮点款，让每一次出场都更有光彩。
               </p>
               <div className="flex gap-4">
                 <Link href="/products">
@@ -100,56 +75,47 @@ export default async function Home() {
                 </Link>
               </div>
             </div>
-            <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
+
+            <div className="relative h-96 overflow-hidden rounded-2xl bg-white shadow-2xl">
               <Image
-                src="https://images.unsplash.com/photo-1635767798638-3e2523c0188c?w=800"
+                src={heroImageSrc}
                 alt="精美耳饰展示"
                 fill
-                className="object-cover"
                 priority
+                className="object-cover"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Categories */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">商品分类</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <CategoryCard
-              title="耳钉"
-              description="简约精致，日常百搭"
-              image="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400"
-              href="/products?category=stud"
-            />
-            <CategoryCard
-              title="耳环"
-              description="优雅灵动，彰显气质"
-              image="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400"
-              href="/products?category=dangle"
-            />
-            <CategoryCard
-              title="耳圈"
-              description="时尚前卫，个性十足"
-              image="https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=400"
-              href="/products?category=hoop"
-            />
+          <h2 className="mb-12 text-center text-3xl font-bold">商品分类</h2>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {categories.map((category) => (
+              <CategoryCard
+                key={category.id}
+                title={category.title}
+                description={category.description}
+                image={getCategoryImage(category.id)}
+                href={`/products?category=${category.id}`}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-16 bg-stone-50">
+      <section className="bg-stone-50 py-16">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-12">
+          <div className="mb-12 flex items-center justify-between">
             <h2 className="text-3xl font-bold">热销推荐</h2>
             <Link href="/products" className="text-[#D4A574] hover:underline">
               查看全部 →
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {featuredProducts.map((product: FeaturedProduct) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -157,30 +123,13 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Features */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <FeatureItem
-              icon="🚚"
-              title="免费配送"
-              description="订单满299元免运费"
-            />
-            <FeatureItem
-              icon="✨"
-              title="品质保证"
-              description="100%正品保证"
-            />
-            <FeatureItem
-              icon="🔄"
-              title="7天退换"
-              description="无忧退换货服务"
-            />
-            <FeatureItem
-              icon="💎"
-              title="精美包装"
-              description="送礼自用两相宜"
-            />
+          <div className="grid grid-cols-1 gap-8 text-center md:grid-cols-4">
+            <FeatureItem icon="🚚" title="免费配送" description="订单满 299 元免运费" />
+            <FeatureItem icon="✨" title="品质保证" description="精选材质，细节可见" />
+            <FeatureItem icon="🔄" title="7 天退换" description="支持无忧退换服务" />
+            <FeatureItem icon="💎" title="精美包装" description="自用送礼都很合适" />
           </div>
         </div>
       </section>
@@ -201,7 +150,7 @@ function CategoryCard({
 }) {
   return (
     <Link href={href} className="group">
-      <div className="relative h-64 rounded-xl overflow-hidden">
+      <div className="relative h-64 overflow-hidden rounded-xl bg-stone-100">
         <Image
           src={image}
           alt={title}
@@ -210,7 +159,7 @@ function CategoryCard({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-0 left-0 p-6 text-white">
-          <h3 className="text-xl font-bold mb-1">{title}</h3>
+          <h3 className="mb-1 text-xl font-bold">{title}</h3>
           <p className="text-sm opacity-90">{description}</p>
         </div>
       </div>
@@ -219,20 +168,20 @@ function CategoryCard({
 }
 
 function ProductCard({ product }: { product: FeaturedProduct }) {
+  const imageSrc = getProductImageSrc(
+    "imageUrl" in product ? product.imageUrl : undefined,
+    "category" in product ? product.category : undefined
+  )
+
   return (
     <Link href={`/products/${product.id}`} className="group">
-      <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition-shadow">
-        <div className="relative h-64">
-          <Image
-            src={product.imageUrl || "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400"}
-            alt={product.name}
-            fill
-            className="object-cover"
-          />
+      <div className="overflow-hidden rounded-xl bg-white shadow transition-shadow hover:shadow-lg">
+        <div className="relative h-64 bg-stone-100">
+          <Image src={imageSrc} alt={product.name} fill className="object-cover" />
         </div>
         <div className="p-4">
-          <h3 className="font-medium text-stone-900 mb-2">{product.name}</h3>
-          <p className="text-[#D4A574] font-bold">¥{Number(product.price).toFixed(2)}</p>
+          <h3 className="mb-2 font-medium text-stone-900">{product.name}</h3>
+          <p className="font-bold text-[#D4A574]">¥{Number(product.price).toFixed(2)}</p>
         </div>
       </div>
     </Link>

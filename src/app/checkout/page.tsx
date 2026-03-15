@@ -24,6 +24,7 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
+  const [authRequired, setAuthRequired] = useState(false)
   const [address, setAddress] = useState("")
   const [city, setCity] = useState("")
   const [postalCode, setPostalCode] = useState("")
@@ -41,7 +42,7 @@ export default function CheckoutPage() {
         const data = await res.json()
         setCartItems(data)
       } else if (res.status === 401) {
-        router.push("/login")
+        setAuthRequired(true)
       }
     } catch (error) {
       console.error("Error fetching cart:", error)
@@ -138,6 +139,17 @@ export default function CheckoutPage() {
   }
 
   if (cartItems.length === 0) {
+    if (authRequired) {
+      return (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">请先登录后继续结算</h1>
+          <Button onClick={() => router.push("/login")} style={{ backgroundColor: "#D4A574" }}>
+            去登录
+          </Button>
+        </div>
+      )
+    }
+
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">购物车是空的</h1>

@@ -7,6 +7,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
+import { getProductImageSrc } from "@/lib/product-images"
 
 interface CartItem {
   id: string
@@ -23,6 +24,7 @@ interface CartItem {
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [authRequired, setAuthRequired] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function CartPage() {
         const data = await res.json()
         setCartItems(data)
       } else if (res.status === 401) {
-        router.push("/login")
+        setAuthRequired(true)
       }
     } catch (error) {
       console.error("Error fetching cart:", error)
@@ -101,6 +103,19 @@ export default function CartPage() {
   }
 
   if (cartItems.length === 0) {
+    if (authRequired) {
+      return (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <ShoppingBag className="mb-4 h-16 w-16 mx-auto text-stone-300" />
+          <h1 className="mb-4 text-2xl font-bold">请先登录后查看购物车</h1>
+          <p className="mb-8 text-stone-500">登录后可以同步你的购物车和收藏商品。</p>
+          <Link href="/login">
+            <Button style={{ backgroundColor: "#D4A574" }}>去登录</Button>
+          </Link>
+        </div>
+      )
+    }
+
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <ShoppingBag className="h-16 w-16 mx-auto text-stone-300 mb-4" />
@@ -127,7 +142,7 @@ export default function CartPage() {
               <div className="flex gap-4">
                 <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                   <Image
-                    src={item.product.imageUrl || "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=200"}
+                    src={getProductImageSrc(item.product.imageUrl)}
                     alt={item.product.name}
                     fill
                     className="object-cover"

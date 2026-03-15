@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Edit, Trash2 } from "lucide-react"
+import { getProductImageSrc } from "@/lib/product-images"
 
 interface Product {
   id: string
@@ -99,7 +100,7 @@ export default function AdminProductsPage() {
                     <td className="py-3 px-4">
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden">
                         <Image
-                          src={product.imageUrl || "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=100"}
+                          src={getProductImageSrc(product.imageUrl, product.category)}
                           alt={product.name}
                           fill
                           className="object-cover"

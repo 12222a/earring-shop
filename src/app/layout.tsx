@@ -5,8 +5,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Elegant Earrings",
-  description: "Discover elegant earrings for every style and moment.",
+  title: "Elegant Earrings | 精美耳饰商店",
+  description: "精选耳钉、耳环与耳圈作品，帮助你快速找到适合日常与重要场合的耳饰。",
 }
 
 export default function RootLayout({

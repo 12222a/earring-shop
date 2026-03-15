@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Card } from "@/components/ui/card"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
+import { getProductImageSrc } from "@/lib/product-images"
 
 interface OrderItem {
   id: string
@@ -37,7 +37,7 @@ const statusMap = {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
+  const [authRequired, setAuthRequired] = useState(false)
 
   useEffect(() => {
     fetchOrders()
@@ -46,11 +46,12 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     try {
       const res = await fetch("/api/orders")
+
       if (res.ok) {
         const data = await res.json()
         setOrders(data)
       } else if (res.status === 401) {
-        router.push("/login")
+        setAuthRequired(true)
       }
     } catch (error) {
       console.error("Error fetching orders:", error)
@@ -62,10 +63,10 @@ export default function OrdersPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-stone-200 rounded w-1/4"></div>
-          <div className="h-32 bg-stone-200 rounded"></div>
-          <div className="h-32 bg-stone-200 rounded"></div>
+        <div className="space-y-4 animate-pulse">
+          <div className="h-8 w-1/4 rounded bg-stone-200"></div>
+          <div className="h-32 rounded bg-stone-200"></div>
+          <div className="h-32 rounded bg-stone-200"></div>
         </div>
       </div>
     )
@@ -73,22 +74,29 @@ export default function OrdersPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">我的订单</h1>
+      <h1 className="mb-8 text-3xl font-bold">我的订单</h1>
 
-      {orders.length === 0 ? (
+      {authRequired ? (
         <Card className="p-12 text-center">
-          <p className="text-stone-500 mb-4">暂无订单</p>
+          <p className="mb-4 text-stone-500">请先登录后查看订单记录。</p>
+          <Link href="/login" className="text-[#D4A574] hover:underline">
+            去登录 →
+          </Link>
+        </Card>
+      ) : orders.length === 0 ? (
+        <Card className="p-12 text-center">
+          <p className="mb-4 text-stone-500">暂时还没有订单。</p>
           <Link href="/products" className="text-[#D4A574] hover:underline">
-            去购物 →
+            去逛逛 →
           </Link>
         </Card>
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
             <Card key={order.id} className="p-6">
-              <div className="flex justify-between items-start mb-4">
+              <div className="mb-4 flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-stone-500">订单号: {order.id}</p>
+                  <p className="text-sm text-stone-500">订单号：{order.id}</p>
                   <p className="text-sm text-stone-500">
                     {new Date(order.createdAt).toLocaleDateString("zh-CN")}
                   </p>
@@ -101,9 +109,9 @@ export default function OrdersPage() {
               <div className="space-y-3">
                 {order.orderItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden">
+                    <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-stone-100">
                       <Image
-                        src={item.product.imageUrl || "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=100"}
+                        src={getProductImageSrc(item.product.imageUrl)}
                         alt={item.product.name}
                         fill
                         className="object-cover"
@@ -116,23 +124,17 @@ export default function OrdersPage() {
                       >
                         {item.product.name}
                       </Link>
-                      <p className="text-sm text-stone-500">
-                        数量: {item.quantity}
-                      </p>
+                      <p className="text-sm text-stone-500">数量：{item.quantity}</p>
                     </div>
-                    <p className="font-medium">
-                      ¥{Number(item.price).toFixed(2)}
-                    </p>
+                    <p className="font-medium">¥{Number(item.price).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t mt-4 pt-4 flex justify-between items-center">
-                <p className="text-stone-600">
-                  共 {order.orderItems.length} 件商品
-                </p>
+              <div className="mt-4 flex items-center justify-between border-t pt-4">
+                <p className="text-stone-600">共 {order.orderItems.length} 件商品</p>
                 <p className="text-xl font-bold text-[#D4A574]">
-                  合计: ¥{Number(order.total).toFixed(2)}
+                  合计：¥{Number(order.total).toFixed(2)}
                 </p>
               </div>
             </Card>
