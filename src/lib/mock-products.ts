@@ -45,7 +45,7 @@ export const mockProducts: MockProduct[] = [
     name: "钻石耳钉",
     description: "闪亮锆石设计，通勤和约会都适合。",
     price: 159,
-    imageUrl: "https://images.unsplash.com/photo-1635767798638-3e2523c0188c?w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
     category: "stud",
     featured: true,
     stock: 20,
