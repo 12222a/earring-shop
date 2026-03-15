@@ -5,9 +5,10 @@ import { authOptions } from "@/lib/auth"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session || (session.user as any).role !== "ADMIN") {
@@ -21,7 +22,7 @@ export async function PUT(
     const { status } = body
 
     const order = await prisma.order.update({
-      where: { id: params.id },
+      where: { id },
       data: { status }
     })
 
